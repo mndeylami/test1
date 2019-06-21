@@ -9,16 +9,14 @@ import base64
 import requests
 from requests import RequestException
 from requests.adapters import HTTPAdapter
-from urllib3.util import Retryfrom
+from requests.packages.urllib3.util.retry import Retry
+#from urllib3.util import Retry
 
-requests
-import RequestException
-from requests.adapters import HTTPAdapter
 
 TENANT_NAME = 'elasticaco'
 DOMAIN_NAME = '@elastica.co'
-USER_NAME = 'anuvrath.joshi@elastica.co'
-PASSWORD = 'Elastica@2017'
+USER_NAME = 'nick.deylami@elastica.co'
+PASSWORD = 'Borogomsho@81'
 
 CREATE_USER = "https://perfapi.elastica-inc.com/" + TENANT_NAME + "/api/admin/v1/users/"
 GET_USER_DETAIL_BY_EMAIL = "https://perfapi.elastica-inc.com/" + TENANT_NAME + "/api/admin/v1/users/?email={email}"
@@ -115,9 +113,42 @@ class UserHandler(object):
     def delete_user(self, u_id):
         """ Deletes the give user """
         request_resp = self.client.do_delete(DELETE_USER.replace('{id}', u_id))
-        logging.info("Request returned with status code: %s", request_resp.status_code)
-        if request_resp.status_code == 204:
-            logging.info('User %s deleted', u_id)
+        #logging.info("Request returned with status code: %s", request_resp.status_code)
+        if request_resp.status_code == 204 or request_resp.status_code == 200 or request_resp.status_code == 201:
+            #('User %s deleted', u_id)
+            print "DELETED " + str(u_id)
 
 
+    def get_user_details_by_email(self, user_email):
+        """ Get User details for the given email_id """
+        logging.debug("getting user details for %s", user_email)
+        request_resp = self.client.do_get(GET_USER_DETAIL_BY_EMAIL.replace('{email}', user_email))
+        if request_resp.status_code == 200:
+            json_data = json.loads(request_resp.text)
+            if json_data:
+                return json_data['objects'][0]['id'], user_email
+            else:
+                logging.error('Received empty response')
+                sys.exit(-1)
+        else:
+            logging.error('Unable to get user user details for %s', user_email)
+            logging.error('Get user details API failed with status code: %s', request_resp.status_code)
+            sys.exit(-1)
 
+
+def main():
+    #logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    logging.basicConfig(filename='tmp.log', level=logging.DEBUG)
+    #user_id = "5a4fcdbf67dc8d1c7d422203"
+    handler = UserHandler(1)
+    f = open("TTTae", 'r')
+    for id in f:
+        id = id.strip()
+        handler.delete_user(id)
+    chunk_size = 15
+    #while chunk_size <= 30:
+    #    print handler.get_user_details_by_email("perf_test_*")
+    #    chunk_size += 15
+    #print handler.get_user_details_by_email("perf_test_1515179458@elastica.co")
+    print handler.get_users_details_by_email("perf_test")
+main()
